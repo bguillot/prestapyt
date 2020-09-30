@@ -125,6 +125,9 @@ class PrestaShopWebService(object):
                            401: 'Unauthorized',
                            403: 'Forbidden',
                            404: 'Not Found',
+                           502: 'Bad Gateway',
+                           503: 'Service Unavailable',
+                           504: 'Gateway Time-out',
                            405: 'Method Not Allowed',
                            500: 'Internal Server Error',}
         error_label = ('PrestaShop error: %d %s. %s')

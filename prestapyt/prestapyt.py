@@ -27,6 +27,7 @@ import dict2xml
 import unicode_encode
 import base64
 from cStringIO import StringIO
+from requests.exceptions import ConnectionError
 
 from xml.parsers.expat import ExpatError
 from xml.dom.minidom import parseString
@@ -132,13 +133,15 @@ class PrestaShopWebService(object):
                            500: 'Internal Server Error',}
         error_label = ('PrestaShop error: %d %s. %s')
         if status_code in (200, 201):
-            return True
+            raise ConnectionError(error_label % (status_code, '', self._parse_error(content)), status_code)
         elif status_code == 401:
             raise PrestaShopAuthenticationError(error_label % (status_code, message_by_code[status_code], ''), status_code)
+        if status_code in (502, 503, 504):
+            raise ConnectionError(error_label % (status_code, message_by_code[status_code], self._parse_error(content)), status_code)
         elif status_code in message_by_code:
             raise PrestaShopWebServiceError(error_label % (status_code, message_by_code[status_code], self._parse_error(content)), status_code)
         else:
-            raise PrestaShopWebServiceError(error_label % (status_code, message_by_code[status_code], self._parse_error(content)), status_code)
+            raise PrestaShopWebServiceError(error_label % (status_code, 'Unkown Error', self._parse_error(content)), status_code)
 
     def _check_version(self, version):
         """
